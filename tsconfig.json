@@ -1,4 +1,5 @@
 {
+  "extends": "./tsconfig.paths.json",
   "compilerOptions": {
     "target": "ES2020",
     "module": "commonjs",
@@ -24,8 +25,12 @@
       "./node_modules/@types"
     ]
   },
+  "include": ["src/**/*.ts"],
   "exclude": [
     "node_modules",
     "cdk.out"
-  ]
+  ],
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  }
 }
