@@ -5,22 +5,20 @@ import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
 import * as path from 'path';
-import * as dotenv from "dotenv";
-dotenv.config({ path: __dirname+'/.env' });
+import { ConfigProps, config } from './env-config';
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 const stage = process.env.STAGE ?? "development";
 
+export type AwsEnvStackProps = cdk.StackProps & {
+  config: Readonly<ConfigProps>
+}
+
 export class FileSearchBackendMongodbStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: AwsEnvStackProps) {
     super(scope, id, props);
 
-    // The code that defines your stack goes here
-
-    // example resource
-    // const queue = new sqs.Queue(this, 'FileSearchBackendMongodbQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    const {config} = props;
 
     const api =  new RestApi(this, `file-search-backend-mongodb-${stage}`, {
       description: "mongodb lambda backend",
@@ -92,18 +90,27 @@ export class FileSearchBackendMongodbStack extends cdk.Stack {
     bookIdPath.addMethod("GET", new LambdaIntegration(getBookById));
     bookIdPath.addMethod("DELETE", new LambdaIntegration(deleteBookByIdLambda));
     usersBookPath.addMethod("GET", new LambdaIntegration(getBookByUser));
+    
+    const queryLambda = nodejsLambda(this, "queryLambda", "../src/functions/query/queryEmbeddings.ts");
+    const queryAPI = api.root.addResource("query");
+    queryAPI.addMethod("POST", new LambdaIntegration(queryLambda));
+    const deleteVectorDataLambda = nodejsLambda(this, "deleteVectorData", "../src/functions/admin/deleteClassData.ts");
+    const deleteVectorDataAPI = api.root.addResource("admin");
+    deleteVectorDataAPI.addMethod("DELETE", new LambdaIntegration(deleteVectorDataLambda));
   }
 }
 
-export const nodejsLambda = (scope: Construct, description: string, lambdaPath: string) => {
+export const nodejsLambda = (scope: Construct, description: string, lambdaPath: string, duration: number = 30, memory: number = 128) => {
   return new NodejsFunction(scope, description, 
     {
       runtime: Runtime.NODEJS_18_X,
       entry: path.join(__dirname, lambdaPath),
       handler: "handler",
       environment: {
-
+        MONGO_URL: config.MONGO_URL,
+        OPENAI_API_KEY: config.OPENAI_API_KEY
       },
-      timeout: cdk.Duration.seconds(30),
+      memorySize: memory,
+      timeout: cdk.Duration.seconds(duration),
     });
 } 
