@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import { Schema, model } from "mongoose";
 import { BaseModel } from "./baseModel";
 
 export interface IBook extends BaseModel {
@@ -6,7 +6,7 @@ export interface IBook extends BaseModel {
     classId: string;
 }
 
-export const BookSchema = new mongoose.Schema<IBook>(
+export const BookSchema = new Schema<IBook>(
     {
         classId: { type: String, required: true },
         bookName: { type: String, required: true },
@@ -16,3 +16,5 @@ export const BookSchema = new mongoose.Schema<IBook>(
         timestamps: true
     }
 )
+
+const Prompt = model("books", BookSchema);

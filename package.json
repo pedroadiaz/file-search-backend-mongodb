@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.121",
+    "@types/html-to-text": "^9.0.3",
     "@types/jest": "^29.5.4",
     "@types/mongoose": "^5.11.97",
     "@types/node": "20.5.9",
@@ -25,6 +26,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.417.0",
+    "@aws-sdk/client-sagemaker-runtime": "^3.428.0",
     "@middy/core": "^4.6.4",
     "aws-cdk-lib": "2.96.2",
     "aws-sdk": "^2.1462.0",
@@ -32,11 +34,15 @@
     "constructs": "^10.0.0",
     "dotenv": "^16.3.1",
     "form-data": "^4.0.0",
-    "langchain": "^0.0.153",
+    "html-to-text": "^9.0.5",
+    "langchain": "^0.0.171",
     "mongodb": "^5.9.0",
     "mongoose": "^7.5.2",
     "openai": "^4.10.0",
     "pdf-parse": "^1.1.1",
-    "source-map-support": "^0.5.21"
+    "puppeteer": "^19.11.1",
+    "source-map-support": "^0.5.21",
+    "youtube-transcript": "^1.0.6",
+    "youtubei.js": "^5.8.0"
   }
 }

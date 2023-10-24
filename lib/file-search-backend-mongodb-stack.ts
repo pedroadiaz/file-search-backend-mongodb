@@ -97,6 +97,45 @@ export class FileSearchBackendMongodbStack extends cdk.Stack {
     const deleteVectorDataLambda = nodejsLambda(this, "deleteVectorData", "../src/functions/admin/deleteClassData.ts");
     const deleteVectorDataAPI = api.root.addResource("admin");
     deleteVectorDataAPI.addMethod("DELETE", new LambdaIntegration(deleteVectorDataLambda));
+
+    const createPromptLambda = nodejsLambda(this, "createPromptLambda", "../src/functions/prompt/createPrompt.ts");
+    const getPromptsLambda = nodejsLambda(this, "getPromptsLambda", "../src/functions/prompt/getPrompts.ts");
+    const getPromptByClass = nodejsLambda(this, "getPromptByClass", "../src/functions/prompt/getPromptsByClass.ts");
+    const deletePromptByIdLambda = nodejsLambda(this, "deletePromptByIdLambda", "../src/functions/prompt/deletePrompts.ts");
+
+    const promptAPI = api.root.addResource("prompts");
+    const promptByIdPath = promptAPI.addResource("{id}");
+    const promptByClassPath = promptAPI.addResource("class");
+
+    promptAPI.addMethod("POST", new LambdaIntegration(createPromptLambda));
+    promptAPI.addMethod("GET", new LambdaIntegration(getPromptsLambda));
+    promptByIdPath.addMethod("DELETE", new LambdaIntegration(deletePromptByIdLambda));
+    promptByClassPath.addMethod("GET", new LambdaIntegration(getPromptByClass));
+
+    const createFeedbackLambda = nodejsLambda(this, "createFeedbackLambda", "../src/functions/feedback/createFeedback.ts");
+    const getFeedbackLambda = nodejsLambda(this, "getFeedbackLambda", "../src/functions/feedback/getFeedback.ts");
+    const getFeedbackById = nodejsLambda(this, "getFeedbackById", "../src/functions/feedback/getFeedbackById.ts");
+    const deleteFeedbackByIdLambda = nodejsLambda(this, "deleteFeedbackByIdLambda", "../src/functions/feedback/deleteFeedback.ts");
+
+    const feedbackAPI = api.root.addResource("feedback");
+    const feedbackByIdPath = feedbackAPI.addResource("{id}");
+
+    feedbackAPI.addMethod("POST", new LambdaIntegration(createFeedbackLambda));
+    feedbackAPI.addMethod("GET", new LambdaIntegration(getFeedbackLambda));
+    feedbackByIdPath.addMethod("DELETE", new LambdaIntegration(deleteFeedbackByIdLambda));
+    feedbackByIdPath.addMethod("GET", new LambdaIntegration(getFeedbackById));
+    
+    const sagemakerLambda = nodejsLambda(this, "sagemakerLambda", "../src/functions/query/sageMaker.ts");
+    const sagemakerAPI = api.root.addResource("sagemaker");
+    sagemakerAPI.addMethod("POST", new LambdaIntegration(sagemakerLambda));
+    
+    const convertUrlLambda = nodejsLambda(this, "convertUrlLambda", "../src/functions/processFiles/convertUrlToText.ts");
+    const convertUrlAPI = api.root.addResource("url");
+    convertUrlAPI.addMethod("POST", new LambdaIntegration(convertUrlLambda));
+    
+    const convertYoutubeLambda = nodejsLambda(this, "convertYoutubeLambda", "../src/functions/processFiles/convertYouTubeToText.ts");
+    const convertYoutubeAPI = api.root.addResource("youtube");
+    convertYoutubeAPI.addMethod("POST", new LambdaIntegration(convertYoutubeLambda));
   }
 }
 
@@ -108,7 +147,8 @@ export const nodejsLambda = (scope: Construct, description: string, lambdaPath: 
       handler: "handler",
       environment: {
         MONGO_URL: config.MONGO_URL,
-        OPENAI_API_KEY: config.OPENAI_API_KEY
+        OPENAI_API_KEY: config.OPENAI_API_KEY,
+        SAGE_MAKER_ENDPOINT: config.SAGE_MAKER_ENDPOINT
       },
       memorySize: memory,
       timeout: cdk.Duration.seconds(duration),
